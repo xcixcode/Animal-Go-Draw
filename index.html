@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Animal-Go-Draw</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 기본 스타일 */
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            text-align: center; 
+            padding: 10px; 
+            background-color: #f0f0f0; 
+            color: #333;
+            overflow-x: hidden; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background-color: #fff; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+            position: relative;
+            overflow: hidden; 
+        }
+        
+        /* 🌟 제목 디자인 🌟 */
+        h1 { 
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 700; 
+            font-size: 2.2em; 
+            margin-bottom: 20px;
+            padding: 18px 25px; 
+            border-radius: 12px; 
+            color: #ecf0f1; 
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            box-shadow: 
+                0 6px 0 #2c3e50, 
+                0 10px 20px rgba(0, 0, 0, 0.5), 
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+            letter-spacing: 3px; 
+            display: inline-block;
+        }
+
+        /* 캐릭터 선택 그리드 */
+        h2 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .character-selection {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 10px; 
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+        }
+        .character-card {
+            background-color: #ecf0f1;
+            padding: 10px 5px; 
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .character-card.selected {
+            background-color: #2ecc71;
+            color: white;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.5);
+        }
+        
+        /* 통합된 아이콘 스타일 */
+        .icon-stack-wrapper { 
+            position: relative;
+            width: 3em; 
+            height: 3em; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .animal-rider-icon { 
+            position: absolute;
+            font-size: 1.5em; 
+            top: 0.1em; 
+            left: 50%;
+            transform: translateX(-50%); 
+            z-index: 2; 
+        }
+
+        .vehicle-base-icon { 
+            position: absolute;
+            font-size: 2.8em; 
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(0); 
+            z-index: 1; 
+        }
+
+        .character-name { font-weight: bold; font-size: 1em; } 
+        
+        /* 버튼 디자인 */
+        .start-button { 
+            background-color: #e74c3c; 
+            color: white; 
+            border: none; 
+            padding: 20px 40px; 
+            margin: 30px 10px 10px;
+            font-size: 1.5em; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.1s;
+            font-weight: bold;
+            box-shadow: 0 6px 0 #c0392b; 
+        }
+        .start-button:hover:not(:disabled) { 
+            background-color: #c0392b; 
+            transform: translateY(2px); 
+            box-shadow: 0 4px 0 #a02e21;
+        }
+        .start-button:disabled { 
+            background-color: #cccccc; 
+            cursor: not-allowed; 
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 레이스 트랙 시각화 */
+        .race-track {
+            margin: 40px auto 0 auto;
+            width: 740px; 
+            max-width: 100%; 
+            background-color: #2c3e50;
+            border-radius: 10px;
+            padding: 0 0 5px 0; 
+            overflow: hidden;
+            position: relative;
+            min-height: 120px; 
+        }
+        
+        /* 트랙 레인 */
+        .track-lane {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 5px 0 5px 0; 
+            position: relative;
+            height: 70px; 
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.3); 
+        }
+        .track-lane:last-child {
+            border-bottom: none;
+        }
+        
+        /* 레이스 트랙의 레이서 유닛 */
+        .racer-visual-unit { 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            position: absolute; 
+            left: 5px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            transition: transform 0.05s linear; 
+            will-change: transform;
+            z-index: 3; 
+        }
+        
+        /* 결승선 라인 확장 */
+        .finish-line {
+            position: absolute;
+            right: 0px; 
+            top: 0;
+            bottom: 0;
+            width: 80px; 
+            background-image: repeating-linear-gradient(45deg, #fff, #fff 7px, #000 7px, #000 14px);
+            z-index: 0; 
+        }
+        
+        /* 결과 표시 */
+        .result { 
+            margin-top: 30px; 
+            padding: 30px; 
+            background: linear-gradient(145deg, #ffd700, #ffc400); 
+            border: 6px solid #e67e22; 
+            border-radius: 15px; 
+            font-weight: bold;
+            color: #c0392b;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+            opacity: 0; 
+            transform: scale(0.8); 
+        }
+        .result > p {
+            font-size: 2.2em; 
+            margin-bottom: 15px;
+        }
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 🏆 순위표 스타일 추가 🏆 */
+        .leaderboard {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        .leaderboard h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #34495e;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 5px;
+        }
+        .rank-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .rank-item:last-child { border-bottom: none; }
+        .rank {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1em;
+            width: 30px;
+            text-align: center;
+            margin-right: 15px;
+            color: #2c3e50;
+        }
+        .rank-1 { color: #ffd700; font-size: 1.5em; } /* 1등 강조 */
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+        .rank-name {
+            font-weight: bold;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+        .rank-name .icon-stack-wrapper { transform: scale(0.7); margin-right: 5px; }
+
+        /* --- 모바일 반응형 웹 디자인 --- */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; padding: 10px; letter-spacing: 2px; } 
+            .container { padding: 15px 5px; border-radius: 0; box-shadow: none; }
+            .character-selection { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .start-button { padding: 15px 30px; font-size: 1.2em; }
+            .result > p { font-size: 1.5em; }
+            .leaderboard { padding: 10px; }
+            .rank { font-size: 1em; width: 20px; margin-right: 10px; }
+            .rank-1 { font-size: 1.2em; }
+            
+            /* 레이스 트랙: calc(100% - 10px)로 정확한 너비 계산 및 마진 5px로 중앙 정렬 */
+            .race-track { 
+                width: calc(100% - 10px); 
+                margin-left: 5px;
+                margin-right: 5px;
+                background-color: #2c3e50; 
+                border-radius: 10px; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <audio id="fanfareSound" src="https://www.myinstants.com/media/sounds/undertale-sfx-rare-to-find.mp3" preload="auto"></audio>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, memo, useRef } = React;
+
+        const ALL_ANIMALS = [
+            { id: 'cheetah', name: "치타", icon: "🐆", kart: "🏎️" },
+            { id: 'rabbit', name: "토끼", icon: "🐇", kart: "🛴" },
+            { id: 'penguin', name: "펭귄", icon: "🐧", kart: "🛷" },
+            { id: 'snail', name: "달팽이", icon: "🐌", kart: "🚜" },
+            { id: 'tiger', name: "호랑이", icon: "🐅", kart: "🚀" },
+            { id: 'elephant', name: "코끼리", icon: "🐘", kart: "🚚" },
+            { id: 'fox', name: "여우", icon: "🦊", kart: "🏍️" },
+            { id: 'monkey', name: "원숭이", icon: "🐒", kart: "🚲" },
+            { id: 'bear', name: "곰", icon: "🐻", kart: "🚌" },
+            { id: 'panda', name: "판다", icon: "🐼", kart: "🛵" },
+        ];
+        
+        const FINISH_LINE_WIDTH = 80; 
+        const RACER_START_OFFSET = 5; 
+        const UPDATE_INTERVAL = 50; 
+
+        // --------------------------------------------------------
+        // 재사용 컴포넌트들 (memo 최적화)
+        // --------------------------------------------------------
+        const AnimalKartIcon = memo(({ animal }) => (
+            <div className="icon-stack-wrapper">
+                <span className="animal-rider-icon">{animal.icon}</span>
+                <span className="vehicle-base-icon">{animal.kart}</span>
+            </div>
+        ));
+
+        const CharacterCard = memo(({ animal, isSelected, toggleRacer }) => {
+            return (
+                <div 
+                    className={`character-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => toggleRacer(animal.id)}
+                >
+                    <AnimalKartIcon animal={animal} />
+                    <div className="character-name">{animal.name}</div>
+                </div>
+            );
+        });
+
+        const RacerVisual = memo(({ racer, position, zIndex }) => {
+            return (
+                <div 
+                    className="racer-visual-unit" 
+                    style={{ 
+                        transform: `translateY(-50%) translateX(${position || 0}px)`,
+                        zIndex: zIndex,
+                    }}
+                >
+                    <AnimalKartIcon animal={racer} />
+                    <span className="racer-name-on-track">{racer.name}</span>
+                </div>
+            );
+        }, (prevProps, nextProps) => prevProps.position === nextProps.position);
+
+        /* 🏆 새로운 순위표 컴포넌트 추가 🏆 */
+        const Leaderboard = memo(({ racers }) => {
+            // 레이스 결과가 없거나 참가자가 없으면 표시 안 함
+            if (!racers || racers.length === 0) return null;
+
+            return (
+                <div className="leaderboard">
+                    <h3><i className="fa-solid fa-list-ol"></i> 최종 순위표</h3>
+                    {racers.map((racer, index) => (
+                        <div key={racer.id} className="rank-item">
+                            <span className={`rank rank-${index + 1}`}>
+                                {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}위`}
+                            </span>
+                            <span className="rank-name">
+                                <AnimalKartIcon animal={racer} />
+                                {racer.name}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            );
+        });
+        
+        // --------------------------------------------------------
+        // 메인 컴포넌트: AnimalKartRacerApp
+        // --------------------------------------------------------
+        function AnimalKartRacerApp() {
+            const [selectedRacers, setSelectedRacers] = useState(ALL_ANIMALS.slice(0, 4).map(r => r.id)); 
+            const [winner, setWinner] = useState(null);
+            const [isDrawing, setIsDrawing] = useState(false);
+            const [racerPositions, setRacerPositions] = useState({});
+            const [rankedRacers, setRankedRacers] = useState([]); // 🏆 순위표 상태 추가
+            
+            const trackRef = useRef(null); 
+            const lastRaceState = useRef({ 
+                anchorTrackLength: 0, 
+                finalPositions: {},   
+                isRaceFinished: false 
+            }); 
+            
+            const toggleRacer = useCallback((id) => {
+                setSelectedRacers(prev => {
+                    if (prev.includes(id)) {
+                        if (prev.length <= 2) {
+                            alert("최소 2명의 참가자는 남겨야 합니다!");
+                            return prev;
+                        }
+                        return prev.filter(r => r !== id);
+                    } else {
+                        if (prev.length >= 10) {
+                            alert("최대 10명의 참가자만 선택할 수 있습니다!");
+                            return prev;
+                        }
+                        return [...prev, id];
+                    }
+                });
+                setWinner(null);
+                setRankedRacers([]); // 🏆 순위 초기화
+                lastRaceState.current.isRaceFinished = false; 
+            }, []);
+
+            const playSound = (id, loop = false) => {
+                const audio = document.getElementById(id);
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.loop = loop;
+                    audio.play().catch(e => { console.warn("사운드 재생 실패:", e); });
+                }
+            };
+
+            const getFinalPosition = useCallback(() => {
+                if (trackRef.current) {
+                    const trackWidth = trackRef.current.clientWidth;
+                    return trackWidth - FINISH_LINE_WIDTH - RACER_START_OFFSET; 
+                }
+                return 655; 
+            }, []);
+            
+            const adjustPositionsOnResize = useCallback(() => {
+                const { anchorTrackLength, finalPositions, isRaceFinished } = lastRaceState.current;
+                
+                if (!isRaceFinished || anchorTrackLength === 0 || Object.keys(finalPositions).length === 0) return;
+
+                const currentTrackLength = getFinalPosition();
+                
+                const scaleFactor = currentTrackLength / anchorTrackLength;
+                
+                setRacerPositions(prev => {
+                    const newPositions = { ...prev };
+                    let changed = false;
+
+                    Object.keys(finalPositions).forEach(id => { 
+                           const newPos = finalPositions[id] * scaleFactor;
+                           newPositions[id] = newPos;
+                           changed = true;
+                    });
+                    
+                    return changed ? newPositions : prev;
+                });
+            }, [getFinalPosition]); 
+
+            // 리사이즈 이벤트 리스너 등록
+            useEffect(() => {
+                getFinalPosition(); 
+                
+                window.addEventListener('resize', adjustPositionsOnResize);
+                
+                return () => {
+                    window.removeEventListener('resize', adjustPositionsOnResize);
+                };
+            }, [adjustPositionsOnResize, getFinalPosition]);
+
+            const startRace = () => {
+                const finalPosition = getFinalPosition(); 
+                const racers = ALL_ANIMALS.filter(a => selectedRacers.includes(a.id));
+                
+                if (racers.length < 2 || isDrawing) return;
+
+                setIsDrawing(true);
+                setWinner(null);
+                setRankedRacers([]); // 🏆 레이스 시작 시 순위 초기화
+                lastRaceState.current.isRaceFinished = false; 
+
+                const racerVelocities = racers.reduce((acc, racer) => {
+                    acc[racer.id] = 1.5 + Math.random() * 2.0; 
+                    return acc;
+                }, {});
+
+                setRacerPositions(racers.reduce((acc, r) => ({ ...acc, [r.id]: 0 }), {}));
+                // playSound('drumRollSound', true); // drumRollSound 삭제됨
+
+                const startTime = Date.now();
+                let winnerId = null;
+                const raceRacers = [...racers]; 
+
+                const intervalId = setInterval(() => {
+                    const elapsedTime = (Date.now() - startTime) / 1000;
+
+                    setRacerPositions(prev => {
+                        const newPositions = { ...prev };
+                        let raceFinished = false;
+                        
+                        raceRacers.forEach(racer => {
+                            const speed = racerVelocities[racer.id];
+                            
+                            let newPos = (elapsedTime / speed) * finalPosition;
+                            newPos = Math.min(newPos, finalPosition); 
+                            
+                            newPositions[racer.id] = newPos;
+
+                            if (newPos >= finalPosition && !winnerId) {
+                                winnerId = racer.id;
+                                raceFinished = true;
+                            }
+                        });
+                        
+                        if (raceFinished || elapsedTime > 6) { 
+                            clearInterval(intervalId);
+                            // 🏆 우승자가 없을 경우(시간 초과) 가장 멀리 간 참가자를 우승자로 처리
+                            const finalWinnerId = winnerId || raceRacers.reduce((a, b) => (newPositions[a.id] > newPositions[b.id] ? a : b)).id;
+                            endRace(finalWinnerId, newPositions); 
+                        }
+
+                        return newPositions;
+                    });
+                }, UPDATE_INTERVAL);
+            };
+
+            const endRace = (winnerId, finalPositions) => {
+                setIsDrawing(false);
+                // playSound('drumRollSound', false); // drumRollSound 삭제됨 
+                playSound('fanfareSound', false); 
+                
+                const finalWinner = ALL_ANIMALS.find(a => a.id === winnerId);
+                if (finalWinner) setWinner(finalWinner);
+                
+                // 🏆 순위 결정 로직 추가
+                const racersWithPosition = Object.keys(finalPositions).map(id => ({
+                    ...ALL_ANIMALS.find(a => a.id === id),
+                    position: finalPositions[id]
+                }));
+                
+                // 위치(position)를 기준으로 내림차순 정렬하여 순위표 생성
+                racersWithPosition.sort((a, b) => b.position - a.position);
+                setRankedRacers(racersWithPosition);
+                
+                lastRaceState.current = {
+                    anchorTrackLength: getFinalPosition(), 
+                    finalPositions: finalPositions,
+                    isRaceFinished: true
+                };
+
+                setTimeout(adjustPositionsOnResize, 0); 
+            };
+            
+            const activeRacers = ALL_ANIMALS.filter(a => selectedRacers.includes(a.id));
+
+            // --------------------------------------------------------
+            // 렌더링
+            // --------------------------------------------------------
+            return (
+                <div className="container">
+                    <h1><i className="fa-solid fa-flag-checkered"></i> Animal-Go-Draw</h1>
+                    
+                    {/* 참가자 선택 */}
+                    <h2><i className="fa-solid fa-gamepad"></i> 참가자 선택 ({activeRacers.length}명 / 최대 10명)</h2>
+                    <div className="character-selection">
+                        {ALL_ANIMALS.map(animal => (
+                            <CharacterCard 
+                                key={animal.id} 
+                                animal={animal} 
+                                isSelected={selectedRacers.includes(animal.id)}
+                                toggleRacer={toggleRacer}
+                            />
+                        ))}
+                    </div>
+
+                    {/* 시작 버튼 */}
+                    <button 
+                        className="start-button"
+                        onClick={startRace} 
+                        disabled={isDrawing || activeRacers.length < 2}
+                    >
+                        {isDrawing ? (
+                            <>
+                                <i className="fa-solid fa-spinner fa-spin"></i> 레이스 진행 중...
+                            </>
+                        ) : winner ? (
+                            <>
+                                <i className="fa-solid fa-rotate-right"></i> 다시 레이스! (재도전)
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-forward"></i> 우승자 뽑기 시작!
+                            </>
+                        )}
+                    </button>
+                    
+                    {/* 레이스 트랙: Ref 연결 */}
+                    <div className="race-track" ref={trackRef}>
+                        <div className="finish-line"></div>
+                        
+                        {activeRacers.map((racer, index) => (
+                            <div key={racer.id} className="track-lane">
+                                <RacerVisual 
+                                    racer={racer}
+                                    position={racerPositions[racer.id]}
+                                    zIndex={activeRacers.length - index} 
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* 결과 표시 */}
+                    {winner && (
+                        <div className="result">
+                            <span className="trophy-icon"><i className="fa-solid fa-trophy"></i></span>
+                            <p>우승자는 **{winner.name}{winner.icon}** 입니다! 축하합니다!</p>
+                            
+                            {/* 🏆 순위표 렌더링 🏆 */}
+                            <Leaderboard racers={rankedRacers} />
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ==========================================================
+        // 앱 렌더링
+        // ==========================================================
+        
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<AnimalKartRacerApp />);
+        
+    </script>
+</body>
+</html>
