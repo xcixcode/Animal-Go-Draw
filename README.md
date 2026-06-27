@@ -6,27 +6,20 @@
 
 ## 개요  
 
-**Animal-Go-Draw**는 **React (CDN)** 과 **Babel Standalone**을 활용해 단일 HTML 파일로 제작된 브라우저 기반 인터랙티브 미니게임입니다.  
-사용자는 여러 동물 캐릭터 중 참가자를 선택한 뒤 **"우승자 뽑기 시작"** 버튼을 눌러 레이스를 시작할 수 있습니다.  
-각 캐릭터는 무작위 속도로 결승선을 향해 달리며, 경기 종료 후에는 **랜덤으로 선정된 우승자와 순위표**가 화면에 표시됩니다.  
+**Animal-Go-Draw**는 별도의 빌드 과정 없이 **React CDN**을 사용하여 단일 HTML 파일로 구현된 브라우저 기반 인터랙티브 미니게임입니다.  
+사용자는 동물 캐릭터 중 참가자를 선택한 뒤 **"레이스 시작"** 버튼을 눌러 게임을 진행합니다.  
+각 캐릭터는 무작위 속도로 결승선을 향해 달리며, 경기 종료 후에는 **우승자와 전체 순위표**가 즉시 화면에 표시됩니다.  
 
 ---
 
 ## 기술 스택
 
-* **HTML5 / CSS3** - UI 구조 및 반응형 스타일 구현
-* **JavaScript (ES6+)** - 레이스 로직, 상태 업데이트, 무작위 속도 계산
-* **React (CDN)** - 컴포넌트 기반 구조 (`useState`, `useEffect`, `useCallback`, `useRef` 활용)
-  * 주요 컴포넌트:
-    * `AnimalKartRacerApp` – 전체 앱 로직 및 상태 관리
-    * `CharacterCard` – 참가자 선택 UI 카드
-    * `RacerVisual` – 트랙에서 캐릭터 이동 시각화
-    * `Leaderboard` – 레이스 종료 후 순위표 표시
-    * `AnimalKartIcon` – 동물과 탈것 이모지 겹쳐 표시
-* **Babel Standalone** - 브라우저 내 JSX 실시간 변환
-* **Font Awesome 6** - 인터페이스 내 아이콘 표시
-* **Google Fonts (Orbitron, Noto Sans KR, Press Start 2P)** - 게임 스타일 폰트 적용
-* **HTML Audio Element** - `<audio>` 태그를 이용한 간단한 효과음 재생
+* **HTML5 / CSS3** - UI 구조, Grid/Flexbox 기반 반응형 레이아웃 구현
+* **JavaScript (ES6+)** - 레이스 로직, `setInterval`을 활용한 위치 계산 및 상태 관리
+* **React (CDN)** - 컴포넌트 기반 상태 관리
+  * **JSX 미사용**: 기존 Babel CDN 환경에서 발생하던 구문 오류(Syntax Error)를 방지하고 안정적인 실행을 위해 `React.createElement` 방식을 채택하여 별도의 컴파일 과정 없이 브라우저에서 직접 실행됩니다.
+  * 주요 훅: `useState`를 통한 데이터 및 위치 상태 관리
+* **HTML Audio Element** - 레이스 종료 시 축하 효과음 재생
 
 ---
 
@@ -65,7 +58,4 @@
 > * 일부 모바일 환경에서는 화면 비율이나 UI가 완벽하게 표시되지 않을 수 있습니다.
 > * 외부 라이브러리 및 자료 출처:
 >   * [React](https://reactjs.org/)
->   * [Babel Standalone](https://babeljs.io/docs/en/babel-standalone)
->   * [Font Awesome](https://fontawesome.com/)
->   * [Google Fonts](https://fonts.google.com/)
 > * 위 라이브러리들은 CDN을 통해 로드되므로, 인터넷 연결이 없으면 기능/UI가 정상적으로 표시되지 않을 수 있음
